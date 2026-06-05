@@ -13,7 +13,6 @@ export default function Wave() {
     const leftTextRefs = useRef([]);
     const rightTextRefs = useRef([]);
 
-    // const [activeImage, setActiveImage] = useState("/1.webp");
 
     const focusedIndex = useMotionValue(0);
 
@@ -137,7 +136,7 @@ export default function Wave() {
                 className="absolute left-1/2 -translate-x-1/2 w-[40vw] sm:w-[30vw] md:w-[20vw] lg:w-[15vw] z-10 pointer-events-none"
                 style={{ top: 0, y: thumbY }}  // imageY اتشالت، thumbY بيتحكم في كل حاجة
             >
-                <img src={activeImage} alt="Campaign Image" className="w-auto h-auto max-w-full max-h-[30vh]" />
+                <img src="" alt="Campaign Image" className="w-auto h-auto max-w-full max-h-[30vh]" />
             </motion.div>
             <div className="flex-1 flex flex-col gap-5 items-end relative z-[100] text-[clamp(2rem,10vw,3rem)] font-normal leading-[0.7] max-lg:gap-10 max-lg:text-[5vw]">
 
