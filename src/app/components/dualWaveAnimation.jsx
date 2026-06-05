@@ -1,6 +1,7 @@
 "use client"
 import { motion, useMotionValue, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
-import {  useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLenis } from "./smoothScroll";
 
 
 export default function Wave() {
@@ -13,16 +14,47 @@ export default function Wave() {
     const leftTextRefs = useRef([]);
     const rightTextRefs = useRef([]);
 
-    // const [activeImage, setActiveImage] = useState("/1.webp");
-
-    const focusedIndex = useMotionValue(0);
-
+    const [focusedIndex, setFocusedIndex] = useState(0);
+    const [activeImage, setActiveImage] = useState("/1.webp");
 
     const thumbY = useMotionValue(0);
     const thumbRef = useRef(null);
 
 
+    useMotionValueEvent(scrollYProgress, "change", () => {
+        if (!leftTextRefs.current) return;
 
+        const viewportCenter = window.innerHeight / 2;
+        let closestIndex = 0;
+        let minDistance = Infinity;
+
+        leftTextRefs.current.forEach((el, idx) => {
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const dist = Math.abs((rect.top + rect.height / 2) - viewportCenter);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestIndex = idx;
+            }
+        });
+
+        if (thumbRef.current && containerRef.current) {
+            const wrapperRect = containerRef.current.getBoundingClientRect();
+            const viewportCenter = window.innerHeight / 2;
+            const thumbnailHeight = thumbRef.current.offsetHeight;
+            const wrapperHeight = containerRef.current.offsetHeight;
+
+            const idealY = viewportCenter - wrapperRect.top - thumbnailHeight / 2;
+
+            const minY = -thumbnailHeight / 2;
+            const maxY = wrapperHeight - thumbnailHeight / 2;
+            const clampedY = Math.max(minY, Math.min(maxY, idealY));
+
+            thumbY.set(clampedY)
+        }
+
+        setFocusedIndex(closestIndex);
+    });
 
 
 
@@ -70,49 +102,14 @@ export default function Wave() {
     const fullLeft = useMemo(() => [...leftTexts, ...leftTexts], []);
     const fullRight = useMemo(() => [...rightTexts, ...rightTexts], []);
 
-
-    useMotionValueEvent(scrollYProgress, "change", () => {
-        if (!leftTextRefs.current) return;
-
-        const viewportCenter = window.innerHeight / 2;
-        let closestIndex = 0;
-        let minDistance = Infinity;
-
-        leftTextRefs.current.forEach((el, idx) => {
-            if (!el) return;
-            const rect = el.getBoundingClientRect();
-            const dist = Math.abs((rect.top + rect.height / 2) - viewportCenter);
-            if (dist < minDistance) {
-                minDistance = dist;
-                closestIndex = idx;
-            }
-        });
-
-        if (thumbRef.current && containerRef.current) {
-            const wrapperRect = containerRef.current.getBoundingClientRect();
-            const viewportCenter = window.innerHeight / 2;
-            const thumbnailHeight = thumbRef.current.offsetHeight;
-            const wrapperHeight = containerRef.current.offsetHeight;
-
-            const idealY = viewportCenter - wrapperRect.top - thumbnailHeight / 2;
-
-            const minY = -thumbnailHeight / 2;
-            const maxY = wrapperHeight - thumbnailHeight / 2;
-            const clampedY = Math.max(minY, Math.min(maxY, idealY));
-
-            thumbY.set(clampedY)
+    useEffect(() => {
+        if (fullLeft[focusedIndex]) {
+            setActiveImage(fullLeft[focusedIndex].image);
         }
+    }, [focusedIndex, fullLeft]);
 
-        if (focusedIndex.get() !== closestIndex) {
-            focusedIndex.set(closestIndex);
 
-            if (fullLeft[closestIndex]) {
-
-                thumbRef.current.src = fullLeft[closestIndex].image;
-            }
-
-        }
-    });
+    // const imageY = useTransform(scrollYProgress, [0, 1], [-50, 50]);
 
     return (
         <div ref={containerRef} className="flex w-full gap-[25vw] relative  max-lg:gap-[10vw]">
@@ -134,7 +131,7 @@ export default function Wave() {
             </div>
             <motion.div
                 ref={thumbRef}
-                className="absolute left-1/2 -translate-x-1/2 w-[40vw] sm:w-[30vw] md:w-[20vw] lg:w-[15vw] z-10 pointer-events-none"
+                className="absolute left-1/2 -translate-x-1/2 w-[15vw] z-10 pointer-events-none"
                 style={{ top: 0, y: thumbY }}  // imageY اتشالت، thumbY بيتحكم في كل حاجة
             >
                 <img src={activeImage} alt="Campaign Image" className="w-auto h-auto max-w-full max-h-[30vh]" />
