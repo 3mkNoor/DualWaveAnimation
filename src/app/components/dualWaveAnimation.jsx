@@ -1,6 +1,6 @@
 "use client"
 import { motion, useMotionValue, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {  useEffect, useMemo, useRef, useState } from "react";
 
 
 export default function Wave() {
@@ -13,13 +13,13 @@ export default function Wave() {
     const leftTextRefs = useRef([]);
     const rightTextRefs = useRef([]);
 
+    // const [activeImage, setActiveImage] = useState("/1.webp");
 
     const focusedIndex = useMotionValue(0);
 
 
     const thumbY = useMotionValue(0);
     const thumbRef = useRef(null);
-    const imgRef = useRef(null);
 
 
 
@@ -71,8 +71,6 @@ export default function Wave() {
     const fullRight = useMemo(() => [...rightTexts, ...rightTexts], []);
 
 
-
-
     useMotionValueEvent(scrollYProgress, "change", () => {
         if (!leftTextRefs.current) return;
 
@@ -110,7 +108,7 @@ export default function Wave() {
 
             if (fullLeft[closestIndex]) {
 
-                imgRef.current.src = fullLeft[closestIndex].image;
+                thumbRef.current.src = fullLeft[closestIndex].image;
             }
 
         }
@@ -130,7 +128,7 @@ export default function Wave() {
                         text={text.text}
                         key={i}
                         allTextRefs={leftTextRefs}
-                        isClosest={focusedIndex}
+                        isClosest={focusedIndex === i}
                     />
                 ))}
             </div>
@@ -139,7 +137,7 @@ export default function Wave() {
                 className="absolute left-1/2 -translate-x-1/2 w-[40vw] sm:w-[30vw] md:w-[20vw] lg:w-[15vw] z-10 pointer-events-none"
                 style={{ top: 0, y: thumbY }}  // imageY اتشالت، thumbY بيتحكم في كل حاجة
             >
-                <img ref={imgRef} src={fullLeft[0].image} alt="Campaign Image" className="w-auto h-auto max-w-full max-h-[30vh]" />
+                <img src={activeImage} alt="Campaign Image" className="w-auto h-auto max-w-full max-h-[30vh]" />
             </motion.div>
             <div className="flex-1 flex flex-col gap-5 items-end relative z-[100] text-[clamp(2rem,10vw,3rem)] font-normal leading-[0.7] max-lg:gap-10 max-lg:text-[5vw]">
 
@@ -153,7 +151,7 @@ export default function Wave() {
                         text={text}
                         key={i}
                         allTextRefs={rightTextRefs}
-                        isClosest={focusedIndex}
+                        isClosest={focusedIndex === i}
                     />
                 ))}
             </div>
@@ -200,16 +198,12 @@ function WaveText({ text, side, index, scrollProgress, waveNumber,
         return side === "left" ? rawX : -rawX;
     });
 
-    const color = useTransform(
-        isClosest,  // هي دلوقتي MotionValue
-        (latest) => latest === index ? "#ffffff" : "#4d4d4d"
-    );
-
     return (
         <motion.div
-            className={`w-max uppercase`}
+            className={`w-max uppercase transition-colors duration-200
+                        ${isClosest ? "text-white" : "text-[#4d4d4d]"}`}
             ref={textRef}
-            style={{ x, color }}
+            style={{ x }}
         >
             {text}
         </motion.div>
