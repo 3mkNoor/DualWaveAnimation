@@ -151,7 +151,7 @@ export default function Wave() {
             </div>
             <motion.div
                 ref={thumbRef}
-                className="absolute left-1/2 -translate-x-1/2 w-[15vw] z-10 pointer-events-none"
+                className="absolute left-1/2 -translate-x-1/2 z-10 pointer-events-none"
                 style={{ top: 0, y: thumbY }}  // imageY اتشالت، thumbY بيتحكم في كل حاجة
             >
                 <img src={activeImage} alt="Campaign Image" className=" w-auto h-auto max-w-full max-h-[30vh]" />
