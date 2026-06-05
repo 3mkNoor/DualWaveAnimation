@@ -59,7 +59,7 @@ export default function Wave() {
 
 
     const waveNumber = 12
-    const waveSpeed = .8;
+    const waveSpeed = 1;
 
 
 
