@@ -10,7 +10,7 @@ export default function Home() {
 
   const container = useRef(null);
 
-  const isInView = useInView(container, { once: true, margin: "-50%" })
+  const isInView = useInView(container, { once: true, margin: "-25%" })
 
   const animation = {
 
