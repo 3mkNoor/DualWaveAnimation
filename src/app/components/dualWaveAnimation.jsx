@@ -2,6 +2,8 @@
 import { motion, useMotionValue, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLenis } from "./smoothScroll";
+import { preloadImages } from "../lib/utils";
+import Image from "next/image";
 
 
 export default function Wave() {
@@ -19,6 +21,7 @@ export default function Wave() {
 
     const thumbY = useMotionValue(0);
     const thumbRef = useRef(null);
+
 
 
     useMotionValueEvent(scrollYProgress, "change", () => {
@@ -97,6 +100,23 @@ export default function Wave() {
         "Lexus", "Mercedes-Benz", "Huawei",
     ];
 
+    useEffect(() => {
+        Promise.all(
+            leftTexts.map(({ image }) => {
+                return new Promise((resolve) => {
+                    const img = new window.Image();
+
+                    img.onload = resolve;
+                    img.onerror = resolve;
+
+                    img.src = image;
+                });
+            })
+        ).then(() => {
+            console.log("All images loaded");
+        });
+    }, []);
+
 
 
     const fullLeft = useMemo(() => [...leftTexts, ...leftTexts], []);
@@ -134,7 +154,7 @@ export default function Wave() {
                 className="absolute left-1/2 -translate-x-1/2 w-[15vw] z-10 pointer-events-none"
                 style={{ top: 0, y: thumbY }}  // imageY اتشالت، thumbY بيتحكم في كل حاجة
             >
-                <img src={activeImage} alt="Campaign Image" className="w-auto h-auto max-w-full max-h-[30vh]" />
+                <img src={activeImage} alt="Campaign Image" className=" w-auto h-auto max-w-full max-h-[30vh]" />
             </motion.div>
             <div className="flex-1 flex flex-col gap-5 items-end relative z-[100] text-[clamp(2rem,10vw,3rem)] font-normal leading-[0.7] max-lg:gap-10 max-lg:text-[5vw]">
 
