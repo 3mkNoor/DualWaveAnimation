@@ -1,7 +1,6 @@
 "use client"
 import { motion, useMotionValue, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLenis } from "./smoothScroll";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 
 export default function Wave() {
@@ -14,47 +13,16 @@ export default function Wave() {
     const leftTextRefs = useRef([]);
     const rightTextRefs = useRef([]);
 
-    const [focusedIndex, setFocusedIndex] = useState(0);
-    const [activeImage, setActiveImage] = useState("/1.webp");
+    // const [activeImage, setActiveImage] = useState("/1.webp");
+
+    const focusedIndex = useMotionValue(0);
+
 
     const thumbY = useMotionValue(0);
     const thumbRef = useRef(null);
 
 
-    useMotionValueEvent(scrollYProgress, "change", () => {
-        if (!leftTextRefs.current) return;
 
-        const viewportCenter = window.innerHeight / 2;
-        let closestIndex = 0;
-        let minDistance = Infinity;
-
-        leftTextRefs.current.forEach((el, idx) => {
-            if (!el) return;
-            const rect = el.getBoundingClientRect();
-            const dist = Math.abs((rect.top + rect.height / 2) - viewportCenter);
-            if (dist < minDistance) {
-                minDistance = dist;
-                closestIndex = idx;
-            }
-        });
-
-        if (thumbRef.current && containerRef.current) {
-            const wrapperRect = containerRef.current.getBoundingClientRect();
-            const viewportCenter = window.innerHeight / 2;
-            const thumbnailHeight = thumbRef.current.offsetHeight;
-            const wrapperHeight = containerRef.current.offsetHeight;
-
-            const idealY = viewportCenter - wrapperRect.top - thumbnailHeight / 2;
-
-            const minY = -thumbnailHeight / 2;
-            const maxY = wrapperHeight - thumbnailHeight / 2;
-            const clampedY = Math.max(minY, Math.min(maxY, idealY));
-
-            thumbY.set(clampedY)
-        }
-
-        setFocusedIndex(closestIndex);
-    });
 
 
 
@@ -102,14 +70,49 @@ export default function Wave() {
     const fullLeft = useMemo(() => [...leftTexts, ...leftTexts], []);
     const fullRight = useMemo(() => [...rightTexts, ...rightTexts], []);
 
-    useEffect(() => {
-        if (fullLeft[focusedIndex]) {
-            setActiveImage(fullLeft[focusedIndex].image);
+
+    useMotionValueEvent(scrollYProgress, "change", () => {
+        if (!leftTextRefs.current) return;
+
+        const viewportCenter = window.innerHeight / 2;
+        let closestIndex = 0;
+        let minDistance = Infinity;
+
+        leftTextRefs.current.forEach((el, idx) => {
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const dist = Math.abs((rect.top + rect.height / 2) - viewportCenter);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestIndex = idx;
+            }
+        });
+
+        if (thumbRef.current && containerRef.current) {
+            const wrapperRect = containerRef.current.getBoundingClientRect();
+            const viewportCenter = window.innerHeight / 2;
+            const thumbnailHeight = thumbRef.current.offsetHeight;
+            const wrapperHeight = containerRef.current.offsetHeight;
+
+            const idealY = viewportCenter - wrapperRect.top - thumbnailHeight / 2;
+
+            const minY = -thumbnailHeight / 2;
+            const maxY = wrapperHeight - thumbnailHeight / 2;
+            const clampedY = Math.max(minY, Math.min(maxY, idealY));
+
+            thumbY.set(clampedY)
         }
-    }, [focusedIndex, fullLeft]);
 
+        if (focusedIndex.get() !== closestIndex) {
+            focusedIndex.set(closestIndex);
 
-    // const imageY = useTransform(scrollYProgress, [0, 1], [-50, 50]);
+            if (fullLeft[closestIndex]) {
+
+                thumbRef.current.src = fullLeft[closestIndex].image;
+            }
+
+        }
+    });
 
     return (
         <div ref={containerRef} className="flex w-full gap-[25vw] relative  max-lg:gap-[10vw]">
